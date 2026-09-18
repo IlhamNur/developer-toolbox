@@ -1,0 +1,2 @@
+@props(['label'])
+<label class="json-panel"><span class="panel-label">{{ $label }}</span><textarea {{ $attributes->merge(['class' => 'code-input']) }} spellcheck="false" placeholder="Paste JSON here..."></textarea><span class="panel-meta">JSON input</span></label>
