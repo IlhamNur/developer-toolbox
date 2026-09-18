@@ -54,4 +54,13 @@ class JsonToolsTest extends TestCase
         $this->assertArrayHasKey('active', $result['changed']);
         $this->assertSame(false, $result['changed']['active']['to']);
     }
+
+    public function test_json_can_be_converted_to_java_and_mvel_objects(): void
+    {
+        $service = new JsonToolService();
+        $input = '{"name":"Ilham","active":true,"tags":["api","json"]}';
+
+        $this->assertSame('Map.of("name", "Ilham", "active", true, "tags", ["api", "json"])', $service->toObject($input, 'java'));
+        $this->assertSame('["name": "Ilham", "active": true, "tags": ["api", "json"]]', $service->toObject($input, 'mvel'));
+    }
 }

@@ -75,6 +75,17 @@ final class JsonToolService
         return $this->compareValues($decodedOriginal, $decodedModified);
     }
 
+    public function toObject(string $input, string $target = 'java'): string
+    {
+        $value = $this->decode($input);
+
+        if (! in_array($target, ['java', 'mvel'], true)) {
+            throw new InvalidArgumentException('Choose a supported object format.');
+        }
+
+        return $this->formatObject($value, $target);
+    }
+
     private function decode(string $input): mixed
     {
         $trimmed = trim($input);
@@ -125,6 +136,37 @@ final class JsonToolService
         }
 
         return $original === $modified ? ['unchanged' => $original] : ['changed' => ['from' => $original, 'to' => $modified]];
+    }
+
+    private function formatObject(mixed $value, string $target): string
+    {
+        if (is_array($value)) {
+            if (array_is_list($value)) {
+                return '[' . implode(', ', array_map(fn ($item) => $this->formatObject($item, $target), $value)) . ']';
+            }
+
+            $entries = [];
+            foreach ($value as $key => $item) {
+                $formattedKey = json_encode((string) $key, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $entries[] = $target === 'java'
+                    ? $formattedKey . ', ' . $this->formatObject($item, $target)
+                    : $formattedKey . ': ' . $this->formatObject($item, $target);
+            }
+
+            return $target === 'java'
+                ? 'Map.of(' . implode(', ', $entries) . ')'
+                : '[' . implode(', ', $entries) . ']';
+        }
+
+        if (is_string($value)) {
+            return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
+        if ($value === null) {
+            return 'null';
+        }
+
+        return is_bool($value) ? ($value ? 'true' : 'false') : (string) $value;
     }
 
     private function humanize(JsonException|string $exception): string

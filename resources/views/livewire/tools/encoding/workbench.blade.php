@@ -13,7 +13,7 @@
     </label>
 
     <div class="tool-actions">
-        <button type="button" class="primary-action" wire:click="encode">Encode</button>
+        <button type="button" class="primary-action" wire:click="encode">{{ $slug === 'newline-converter' ? 'Escape' : 'Encode' }}</button>
         <button type="button" class="secondary-action" wire:click="decode">Decode</button>
         <button type="button" class="secondary-action" wire:click="clear">Clear</button>
     </div>

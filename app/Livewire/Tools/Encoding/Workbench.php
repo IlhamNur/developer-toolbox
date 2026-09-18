@@ -22,7 +22,7 @@ class Workbench extends Component
 
     public function mount(string $slug): void
     {
-        abort_unless(in_array($slug, ['base64', 'url-encode', 'html-encode'], true), 404);
+        abort_unless(in_array($slug, ['base64', 'url-encode', 'html-encode', 'newline-converter'], true), 404);
 
         $this->slug = $slug;
     }
@@ -69,6 +69,9 @@ class Workbench extends Component
                 'html-encode' => $this->operation === 'encode'
                     ? $service->htmlEncode($this->input)
                     : $service->htmlDecode($this->input),
+                'newline-converter' => $this->operation === 'encode'
+                    ? $service->newlineEscape($this->input)
+                    : $service->newlineUnescape($this->input),
                 default => throw new InvalidArgumentException('Unsupported encoding tool.'),
             };
         } catch (InvalidArgumentException $exception) {

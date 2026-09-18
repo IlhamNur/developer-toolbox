@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'mvel_executor' => [
+        'url' => env('MVEL_EXECUTOR_URL'),
+    ],
+
 ];

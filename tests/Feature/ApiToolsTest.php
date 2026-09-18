@@ -4,6 +4,10 @@ namespace Tests\Feature;
 
 use App\Services\Api\CurlGeneratorService;
 use App\Services\Api\HttpRequestBuilderService;
+use App\Services\Api\ApiTemplateService;
+use App\Services\Api\ApiRequestTesterService;
+use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 class ApiToolsTest extends TestCase
@@ -39,5 +43,35 @@ class ApiToolsTest extends TestCase
         $this->assertSame('GET', $payload['method']);
         $this->assertSame('https://api.example.com/items?page=2&limit=10', $payload['url']);
         $this->assertSame(['X-Trace: abc123'], $payload['headers']);
+    }
+
+    public function test_api_templates_resolve_environment_variables(): void
+    {
+        $service = new ApiTemplateService();
+
+        $this->assertSame(
+            'https://api.example.com/items?token=demo',
+            $service->resolve('{{BASE_URL}}/items?token={{TOKEN}}', "BASE_URL=https://api.example.com\nTOKEN=demo")
+        );
+    }
+
+    public function test_api_request_tester_returns_status_time_and_body(): void
+    {
+        Http::fake([
+            'https://example.com/items' => Http::response(['ok' => true], 200),
+        ]);
+
+        $response = (new ApiRequestTesterService())->send('GET', 'https://example.com/items');
+
+        $this->assertSame(200, $response['status']);
+        $this->assertTrue($response['successful']);
+        $this->assertStringContainsString('"ok":true', $response['body']);
+    }
+
+    public function test_api_request_tester_rejects_private_urls(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new ApiRequestTesterService())->send('GET', 'http://127.0.0.1:8080/health');
     }
 }

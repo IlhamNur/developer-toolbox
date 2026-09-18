@@ -47,4 +47,25 @@ final class EncodingToolService
     {
         return html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
+
+    public function newlineEscape(string $input): string
+    {
+        return str_replace(
+            ['\\', "\r\n", "\r", "\n", "\t"],
+            ['\\\\', '\\n', '\\n', '\\n', '\\t'],
+            $input
+        );
+    }
+
+    public function newlineUnescape(string $input): string
+    {
+        return preg_replace_callback('/\\\\([nrt\\\\])/', function (array $matches): string {
+            return match ($matches[1]) {
+                'n' => "\n",
+                'r' => "\r",
+                't' => "\t",
+                '\\' => '\\',
+            };
+        }, $input) ?? $input;
+    }
 }

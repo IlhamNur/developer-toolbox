@@ -1,5 +1,56 @@
 # HMNR Developer Toolbox
 
+## MVEL Playground
+
+The MVEL Playground executes controlled MVEL expressions through a separate Java executor. Laravel owns the UI, validation, HTTP integration, and error presentation. The Java service owns MVEL execution and safe result serialization.
+
+### Supported Types
+
+The playground supports String, Integer, Long, Double, Boolean, Null, Map, List, and JSON variables. Safe results are limited to primitive values, maps, and lists.
+
+### Example Expressions
+
+```text
+"Hello " + firstName
+age >= 18 ? "Adult" : "Minor"
+data["name"]
+response.data.ticketNumber
+response.success && response.data.status == "OPEN"
+value != null ? value : ""
+```
+
+### Architecture
+
+```text
+Laravel + Livewire
+	|
+	| HTTP
+	v
+services/mvel-executor
+	|
+	v
+MVEL 2.5.2.Final on Java 11
+```
+
+The executor is configured through `MVEL_EXECUTOR_URL`. It is not emulated in JavaScript and the Laravel application never evaluates user expressions locally.
+
+### Running the Executor
+
+```bash
+cd services/mvel-executor
+mvn test
+mvn package
+java -jar target/mvel-executor-0.1.0.jar
+```
+
+The executor exposes `GET /api/mvel/health` and `POST /api/mvel/execute` on port `8081` by default. See [services/mvel-executor/README.md](services/mvel-executor/README.md) for Docker usage.
+
+### Security Model and Limitations
+
+The executor limits expressions to 50 KB, variables to 100 entries, results to 1 MB, and execution time to 1000 ms. Known access to Runtime, ProcessBuilder, filesystem, network, reflection, class loading, and system APIs is rejected. Production deployment should run the executor as a non-root container with restricted memory, CPU, filesystem, and network access.
+
+MVEL Playground presets are stored only in browser localStorage. Do not save secrets unless the browser profile is trusted.
+
 ## Features
 
 Phase 1 provides a responsive developer workspace with a registry-backed dashboard, category filtering, global search, keyboard command palette, favorites, recent tools, theme switching, and responsive navigation. Phase 2 adds JSON Formatter, Validator, Minifier, Escape, Unescape, and Diff workspaces.

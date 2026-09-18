@@ -34,6 +34,17 @@ class EncodingAndGeneratorToolsTest extends TestCase
         $this->assertSame('hello world?name=Ilham', $service->urlDecode($encoded));
     }
 
+    public function test_newline_converter_escapes_and_restores_line_breaks(): void
+    {
+        $service = new EncodingToolService();
+        $input = "line one\nline two\tvalue";
+
+        $escaped = $service->newlineEscape($input);
+
+        $this->assertSame('line one\\nline two\\tvalue', $escaped);
+        $this->assertSame($input, $service->newlineUnescape($escaped));
+    }
+
     public function test_uuid_generator_creates_valid_uuid_v4_values(): void
     {
         $service = new GeneratorToolService();

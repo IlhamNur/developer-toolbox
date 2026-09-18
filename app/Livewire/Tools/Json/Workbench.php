@@ -29,7 +29,7 @@ class Workbench extends Component
 
     public function mount(string $slug): void
     {
-        abort_unless(in_array($slug, ['json-formatter', 'json-validator', 'json-minifier', 'json-escape', 'json-unescape', 'json-diff'], true), 404);
+        abort_unless(in_array($slug, ['json-formatter', 'json-validator', 'json-minifier', 'json-escape', 'json-unescape', 'json-diff', 'json-to-object'], true), 404);
 
         $this->slug = $slug;
     }
@@ -48,6 +48,7 @@ class Workbench extends Component
                 'json-minifier' => $this->output = $service->minify($this->input),
                 'json-escape' => $this->output = $service->escape($this->input),
                 'json-unescape' => $this->output = $service->unescape($this->input),
+                'json-to-object' => $this->output = $service->toObject($this->input, $this->indentation),
                 'json-diff' => $this->output = json_encode($service->diff($this->input, $this->modifiedInput), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             };
 
